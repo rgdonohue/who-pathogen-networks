@@ -5,22 +5,48 @@
 	<meta charset="utf-8">
 	<title>Pathogen networks</title>
 	<style>
-		body {
-			font-family: sans-serif;
-		}
-		h1 {
-			font-weight: normal;
-			color: #3d3d3d;
-			margin-left: 15px;
-		}
-		.links line {
-			stroke: #999;
-			stroke-opacity: 0.6;
+		.node {
+			font: 300 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
+			fill: #bbb;
 		}
 
-		.nodes circle {
-			stroke: #fff;
-			stroke-width: 1.5px;
+		.node:hover {
+			fill: #000;
+		}
+
+		.link {
+			stroke: steelblue;
+			stroke-opacity: .4;
+			fill: none;
+			pointer-events: none;
+		}
+
+		.node:hover,
+		.node--source,
+		.node--target {
+			font-weight: 700;
+		}
+
+		.node--source {
+			fill: #2ca02c;
+		}
+
+		.node--target {
+			fill: #d62728;
+		}
+
+		.link--source,
+		.link--target {
+			stroke-opacity: 1;
+			stroke-width: 2px;
+		}
+
+		.link--source {
+			stroke: #d62728;
+		}
+
+		.link--target {
+			stroke: #2ca02c;
 		}
 	</style>
 </head>
@@ -30,164 +56,211 @@
 	<svg></svg>
 
 
-<script src="https://d3js.org/d3.v4.min.js"></script>
-<script>
-(function () {
+	<script src="//d3js.org/d3.v3.min.js"></script>
+	<script>
+		(function() {
 
-		var width = window.innerWidth,
-			height = window.innerHeight;
+			var diameter = 960,
+				radius = diameter / 2,
+				innerRadius = radius - 180;
 
-		var svg = d3.select("svg")
-			.attr('width', width)
-			.attr('height', height);
+			var cluster = d3.layout.cluster()
+				.size([400, innerRadius])
+				.sort(null)
+				.value(function(d) {
+					return d.size;
+				});
 
-		var color = d3.scaleOrdinal(d3.schemeCategory20);
+			var bundle = d3.layout.bundle();
 
-		var simulation = d3.forceSimulation()
-			.force("link", d3.forceLink().id(function (d) {
-				return d.id;
-			}))
-			.force("charge", d3.forceManyBody())
-			.force("center", d3.forceCenter(width / 2, height / 2))
-			.force("x", d3.forceX())
-      .force("y", d3.forceY());
+			var line = d3.svg.line.radial()
+				.interpolate("bundle")
+				.tension(.85)
+				.radius(function(d) {
+					return d.y;
+				})
+				.angle(function(d) {
+					return d.x / 180 * Math.PI;
+				});
+
+			var svg = d3.select("body").append("svg")
+				.attr("width", diameter)
+				.attr("height", diameter)
+				.append("g")
+				.attr("transform", "translate(" + radius + "," + radius + ")");
+
+			var link = svg.append("g").selectAll(".link"),
+				node = svg.append("g").selectAll(".node");
 
 
-		d3.csv("data/networks_20161030.csv", function (error, data) {
-			if (error) throw error;
+			d3.csv("data/networks_20161107.csv", function(error, data) {
+				if (error) throw error;
 
-			// first build the empty data structure
-			var nodeData = {
-				"nodes": [],
-				"links": []
-			};
+				var parsedData = [];
 
-			// loop through our data and populate the json
-			data.forEach(function (d, i) {
+				data.forEach(function(d, i) {
 
-				// first add all the affiliations as nodes
-				for (var i = 1; i <= 19; i++) {
+					parsedData.push({
+						'name': d.Body,
+						'affiliations': []
+					});
 
-					var aff = 0;
+					for (var i = 1; i <= 45; i++) {
+						if (d['Affiliation_' + i]) {
 
-					// if there is an affiliation
-					if (d["Affiliation_" + i]) {
+							parsedData[parsedData.length - 1].affiliations.push(d['Affiliation_' + i])
+						}
 
-						// add the links between body nodes and affiliations as links
-						nodeData.links.push({
-							"source": d.Body,
-							"target": d["Affiliation_" + i]
-						})
+					}
 
-						// loop through structure to see if we've added
-						// this affiliation as a node yet (surely there's a better way?)
-						nodeData.nodes.forEach(function (node) {
+				});
 
-							// if so, change aff to true
-							if (node.id == d["Affiliation_" + i]) {
-								aff = 1;
-							}
-						});
+				console.log(parsedData)
 
-						// if aff is false, add our affiliation to the nodes
-						if (aff == 0) {
-							nodeData.nodes.push({
-								"id": d["Affiliation_" + i],
-								"group": i
-							})
+				var nodes = cluster.nodes(packageHierarchy(parsedData)),
+					links = packageAffiliations(nodes);
+
+				console.log(nodes)
+				console.log(links)
+
+				link = link
+					.data(bundle(links))
+					.enter().append("path")
+					.each(function(d) {
+						d.source = d[0], d.target = d[d.length - 1];
+					})
+					.attr("class", "link")
+					.attr("d", line);
+
+				node = node
+					.data(nodes.filter(function(n) {
+						return !n.children;
+					}))
+					.enter().append("text")
+					.attr("class", "node")
+					.attr("dy", ".31em")
+					.attr("transform", function(d) {
+						return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)");
+					})
+					.style("text-anchor", function(d) {
+						return d.x < 180 ? "start" : "end";
+					})
+					.text(function(d) {
+						return d.key;
+					})
+					// .on("mouseover", mouseovered)
+					// .on("mouseout", mouseouted);
+			});
+
+
+			// function mouseovered(d) {
+			// 	node
+			// 		.each(function(n) {
+			// 			n.target = n.source = false;
+			// 		});
+			//
+			// 	link
+			// 		.classed("link--target", function(l) {
+			// 			if (l.target === d) return l.source.source = true;
+			// 		})
+			// 		.classed("link--source", function(l) {
+			// 			if (l.source === d) return l.target.target = true;
+			// 		})
+			// 		.filter(function(l) {
+			// 			return l.target === d || l.source === d;
+			// 		})
+			// 		.each(function() {
+			// 			this.parentNode.appendChild(this);
+			// 		});
+			//
+			// 	node
+			// 		.classed("node--target", function(n) {
+			// 			return n.target;
+			// 		})
+			// 		.classed("node--source", function(n) {
+			// 			return n.source;
+			// 		});
+			// }
+			//
+			// function mouseouted(d) {
+			// 	link
+			// 		.classed("link--target", false)
+			// 		.classed("link--source", false);
+			//
+			// 	node
+			// 		.classed("node--target", false)
+			// 		.classed("node--source", false);
+			// }
+
+			d3.select(self.frameElement).style("height", diameter + "px");
+
+
+			// Lazily construct the package hierarchy from class names.
+			function packageHierarchy(classes) {
+
+				var map = {};
+
+				function find(name, data) {
+					var node = map[name], i;
+
+					if (!node) {
+						node = map[name] = data || { name: name, children: [] };
+						if (name.length) {
+
+							node.parent = find(name);
+							node.parent.children.push(node);
+							node.key = name;
+						} else {
+							node.parent.null;
 						}
 					}
 
+					return node;
 				}
 
-				// finally add the body organizations as nodes
-				nodeData.nodes.push({
-					"id": d.Body,
-					"group": 0
-				})
-
-			}); // nodeData json done
-
-			var link = svg.append("g")
-				.attr("class", "links")
-				.selectAll("line")
-				.data(nodeData.links)
-				.enter().append("line")
-				.attr("stroke-width", '1.5');
-
-			var node = svg.append("g")
-				.attr("class", "nodes")
-				.selectAll("circle")
-				.data(nodeData.nodes)
-				.enter().append("circle")
-				.attr("r", 5)
-				.attr("fill", function (d) {
-					return color(d.group);
-				})
-				.on('mouseover', function (d) {
-					console.log(d)
-				})
-				.call(d3.drag()
-					.on("start", dragstarted)
-					.on("drag", dragged)
-					.on("end", dragended));
-
-			simulation
-				.nodes(nodeData.nodes)
-				.on("tick", ticked);
-
-			simulation.force("link")
-				.links(nodeData.links);
-
-
-
-		function ticked() {
-
-			link
-				.attr("x1", function (d) {
-					return d.source.x;
-				})
-				.attr("y1", function (d) {
-					return d.source.y;
-				})
-				.attr("x2", function (d) {
-					return d.target.x;
-				})
-				.attr("y2", function (d) {
-					return d.target.y;
+				classes.forEach(function(d) {
+					find(d.name, d);
 				});
 
-			node
-				.attr("cx", function (d) {
-					return d.x;
-				})
-				.attr("cy", function (d) {
-					return d.y;
+				return map[""];
+			}
+
+			// Return a list of affiliations for the given array of nodes.
+			function packageAffiliations(nodes) {
+
+
+
+				var map = {},
+					affiliations = [];
+
+				// Compute a map from name to node.
+				nodes.forEach(function(d) {
+					map[d.name] = d;
 				});
-		}
 
 
-	});
 
-	function dragstarted(d) {
-		if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-		d.fx = d.x;
-		d.fy = d.y;
-	}
 
-	function dragged(d) {
-		d.fx = d3.event.x;
-		d.fy = d3.event.y;
-	}
 
-	function dragended(d) {
-		if (!d3.event.active) simulation.alphaTarget(0);
-		d.fx = null;
-		d.fy = null;
-	}
+				// For each affilation, construct a link from the source to target node.
+				nodes.forEach(function(d) {
+					if (d.affiliations) d.affiliations.forEach(function(i) {
+					  if(i in map){
+							affiliations.push({
+								source: map[d.name],
+								target: map[i]
+							});
+						}
+					});
+				});
+				console.log(affiliations)
+				return affiliations;
+			}
 
-})();
-</script>
+
+
+		})();
+	</script>
 </body>
 
 </html>

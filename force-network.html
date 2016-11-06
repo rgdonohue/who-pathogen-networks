@@ -8,29 +8,33 @@
 		body {
 			font-family: sans-serif;
 		}
+
 		h1 {
 			font-weight: normal;
 			color: #3d3d3d;
 			margin-left: 15px;
 		}
+
 		.links line {
 			/*stroke: #999;
 			stroke-opacity: 0.6;*/
 		}
+
 		.nodes circle {
 			stroke: #fff;
 			stroke-width: 1.5px;
 		}
+
 		div.tooltip {
-		    position: absolute;
-		    max-width: 220px;
-		    padding: 3px 6px;
-				color: grey;
-		    font: 1.1em sans-serif;
-		    background: whitesmoke;
-		    border: 1px solid grey;
-		    border-radius: 3px;
-		    pointer-events: none;
+			position: absolute;
+			max-width: 220px;
+			padding: 3px 6px;
+			color: grey;
+			font: 1.1em sans-serif;
+			background: whitesmoke;
+			border: 1px solid grey;
+			border-radius: 3px;
+			pointer-events: none;
 		}
 	</style>
 </head>
@@ -40,215 +44,218 @@
 	<svg></svg>
 
 
-<script src="https://d3js.org/d3.v4.min.js"></script>
-<script>
-(function () {
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<script>
+		(function() {
 
-		var width = window.innerWidth,
-			height = window.innerHeight;
+			var width = window.innerWidth,
+				height = window.innerHeight;
 
-		var svg = d3.select("svg")
-			.attr('width', width)
-			.attr('height', height);
+			var svg = d3.select("svg")
+				.attr('width', width)
+				.attr('height', height);
 
-		var color = d3.scaleOrdinal(d3.schemeCategory10);
+			var color = d3.scaleOrdinal(d3.schemeCategory20);
 
-		var simulation = d3.forceSimulation()
-			.force("link", d3.forceLink().id(function (d) {
-				return d.id;
-			}))
-			.force("charge", d3.forceManyBody())
-			.force("center", d3.forceCenter(width / 2, height / 2))
-			.force("x", d3.forceX())
-      .force("y", d3.forceY());
-
-
-		var div = d3.select("body").append("div")
-		    .attr("class", "tooltip")
-		    .style("opacity", 0);
+			var simulation = d3.forceSimulation()
+				.force("link", d3.forceLink().id(function(d) {
+					return d.id;
+				}))
+				.force("charge", d3.forceManyBody())
+				.force("center", d3.forceCenter(width / 2, height / 2))
+				.force("x", d3.forceX())
+				.force("y", d3.forceY());
 
 
-		d3.csv("data/networks_20161107.csv", function (error, data) {
-			if (error) throw error;
+			var div = d3.select("body").append("div")
+				.attr("class", "tooltip")
+				.style("opacity", 0);
 
-			// first build the empty data structure
-			var nodeData = {
-				"nodes": [],
-				"links": []
-			};
 
-			// loop through our data and populate the json
-			data.forEach(function (d, i) {
+			d3.csv("data/networks_20161107.csv", function(error, data) {
+				if (error) throw error;
 
-				// first add all the affiliations as nodes
-				for (var i = 1; i <= 19; i++) {
+				// first build the empty data structure
+				var nodeData = {
+					"nodes": [],
+					"links": []
+				};
 
-					var aff = 0;
+				// loop through our data and populate the json
+				data.forEach(function(d, i) {
 
-					// if there is an affiliation
-					if (d["Affiliation_" + i]) {
+					// first add all the affiliations as nodes
+					for (var i = 1; i <= 45; i++) {
 
-						// add the links between body nodes and affiliations as links
-						nodeData.links.push({
-							"source": d.Body,
-							"target": d["Affiliation_" + i],
-							"activity": d["Activity_" + i]
-						})
+						var aff = 0;
 
-						// loop through structure to see if we've added
-						// this affiliation as a node yet (surely there's a better way?)
-						nodeData.nodes.forEach(function (node) {
+						// if there is an affiliation
+						if (d["Affiliation_" + i]) {
 
-							// if so, change aff to true
-							if (node.id == d["Affiliation_" + i]) {
-								aff = 1;
-							}
-						});
-
-						// if aff is false, add our affiliation to the nodes
-						if (aff == 0) {
-							nodeData.nodes.push({
-								"id": d["Affiliation_" + i],
-								"group": i
+							// add the links between body nodes and affiliations as links
+							nodeData.links.push({
+								"source": d.Body,
+								"target": d["Affiliation_" + i],
+								"activity": d["Activity_" + i]
 							})
+
+							// loop through structure to see if we've added
+							// this affiliation as a node yet (surely there's a better way?)
+							nodeData.nodes.forEach(function(node) {
+
+								// if so, change aff to true
+								if (node.id == d["Affiliation_" + i]) {
+									aff = 1;
+								}
+							});
+
+							// if aff is false, add our affiliation to the nodes
+							if (aff == 0) {
+								nodeData.nodes.push({
+									"id": d["Affiliation_" + i],
+									"group": i
+								})
+							}
 						}
+
 					}
 
-				}
+					// finally add the body organizations as nodes
+					nodeData.nodes.push({
+						"id": d.Body,
+						"group": 0
+					})
 
-				// finally add the body organizations as nodes
-				nodeData.nodes.push({
-					"id": d.Body,
-					"group": 0
-				})
+				}); // nodeData json done
 
-			}); // nodeData json done
+				var link = svg.append("g")
+					.attr("class", "links")
+					.selectAll("line")
+					.data(nodeData.links)
+					.enter().append("line")
+					.attr("stroke-width", '1.5')
+					.attr("stroke", "#999")
+					.attr("stroke-opacity", '.6')
+					.on('mouseover', function(d) {
+						d3.select(this)
+							.attr("stroke-width", '3')
+							.attr("stroke", '#990000')
+							.attr("stroke-opacity", '1')
 
-			var link = svg.append("g")
-				.attr("class", "links")
-				.selectAll("line")
-				.data(nodeData.links)
-				.enter().append("line")
-				.attr("stroke-width", '1.5')
-				.attr("stroke", "#999")
-				.attr("stroke-opacity", '.6')
-				.on('mouseover', function(d) {
-					 d3.select(this)
-					 .attr("stroke-width", '3')
-					 .attr("stroke", '#990000')
-					 .attr("stroke-opacity", '1')
-
-					 div.transition()
-							 //  .duration(200)
-								.style("opacity", .9);
-
-								console.log(d)
-						div.html(d.activity)
-								.style("left", (d3.event.pageX + 15) + "px")
-								.style("top", (d3.event.pageY - 28) + "px");
-				})
-				.on('mouseout', function(d) {
-					 d3.select(this)
-					 .attr("stroke-width", '1.5')
-					 .attr("stroke", '#999');
-
-					 div.transition()
-							 // .duration(500)
-							 .style("opacity", 0);
-				});
-
-
-
-			var node = svg.append("g")
-				.attr("class", "nodes")
-				.selectAll("circle")
-				.data(nodeData.nodes)
-				.enter().append("circle")
-				.attr("r", 6)
-				.attr("fill", function (d) {
-					return color(d.group);
-				})
-				.on('mouseover', function (d) {
-					div.transition()
+						div.transition()
 							//  .duration(200)
-							 .style("opacity", .9);
+							.style("opacity", .9);
 
-							 console.log(d)
-					 div.html(d.id)
-							 .style("left", (d3.event.pageX + 15) + "px")
-							 .style("top", (d3.event.pageY - 28) + "px");
-					d3.select(this).attr("r", 16);
-				})
-				.on("mouseout", function(d) {
-            div.transition()
-                // .duration(500)
-                .style("opacity", 0);
-					  d3.select(this).attr("r", 6);
-        })
-				.on("click", function(d) {
-					div.transition()
+						console.log(d)
+						div.html(d.activity)
+							.style("left", (d3.event.pageX + 15) + "px")
+							.style("top", (d3.event.pageY - 28) + "px");
+					})
+					.on('mouseout', function(d) {
+						d3.select(this)
+							.attr("stroke-width", '1.5')
+							.attr("stroke", '#999');
+
+						div.transition()
 							// .duration(500)
 							.style("opacity", 0);
-				})
-				.call(d3.drag()
-					.on("start", dragstarted)
-					.on("drag", dragged)
-					.on("end", dragended));
-
-			simulation
-				.nodes(nodeData.nodes)
-				.on("tick", ticked);
-
-			simulation.force("link")
-				.links(nodeData.links);
-
-		function ticked() {
-
-			link
-				.attr("x1", function (d) {
-					return d.source.x;
-				})
-				.attr("y1", function (d) {
-					return d.source.y;
-				})
-				.attr("x2", function (d) {
-					return d.target.x;
-				})
-				.attr("y2", function (d) {
-					return d.target.y;
-				});
-
-			node
-				.attr("cx", function (d) {
-					return d.x;
-				})
-				.attr("cy", function (d) {
-					return d.y;
-				});
-		}
+					});
 
 
-	});
 
-	function dragstarted(d) {
-		if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-		d.fx = d.x;
-		d.fy = d.y;
-	}
+				var node = svg.append("g")
+					.attr("class", "nodes")
+					.selectAll("circle")
+					.data(nodeData.nodes)
+					.enter().append("circle")
+					.attr("r", function(d) {
+						console.log(d)
+						return 6
+					})
+					.attr("fill", function(d) {
+						return color(d.group);
+					})
+					.on('mouseover', function(d) {
+						div.transition()
+							//  .duration(200)
+							.style("opacity", .9);
 
-	function dragged(d) {
-		d.fx = d3.event.x;
-		d.fy = d3.event.y;
-	}
+						console.log(d)
+						div.html(d.id)
+							.style("left", (d3.event.pageX + 15) + "px")
+							.style("top", (d3.event.pageY - 28) + "px");
+						d3.select(this).attr("r", 16);
+					})
+					.on("mouseout", function(d) {
+						div.transition()
+							// .duration(500)
+							.style("opacity", 0);
+						d3.select(this).attr("r", 6);
+					})
+					.on("click", function(d) {
+						div.transition()
+							// .duration(500)
+							.style("opacity", 0);
+					})
+					.call(d3.drag()
+						.on("start", dragstarted)
+						.on("drag", dragged)
+						.on("end", dragended));
 
-	function dragended(d) {
-		if (!d3.event.active) simulation.alphaTarget(0);
-		d.fx = null;
-		d.fy = null;
-	}
+				simulation
+					.nodes(nodeData.nodes)
+					.on("tick", ticked);
 
-})();
-</script>
+				simulation.force("link")
+					.links(nodeData.links);
+
+				function ticked() {
+
+					link
+						.attr("x1", function(d) {
+							return d.source.x;
+						})
+						.attr("y1", function(d) {
+							return d.source.y;
+						})
+						.attr("x2", function(d) {
+							return d.target.x;
+						})
+						.attr("y2", function(d) {
+							return d.target.y;
+						});
+
+					node
+						.attr("cx", function(d) {
+							return d.x;
+						})
+						.attr("cy", function(d) {
+							return d.y;
+						});
+				}
+
+
+			});
+
+			function dragstarted(d) {
+				if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+				d.fx = d.x;
+				d.fy = d.y;
+			}
+
+			function dragged(d) {
+				d.fx = d3.event.x;
+				d.fy = d3.event.y;
+			}
+
+			function dragended(d) {
+				if (!d3.event.active) simulation.alphaTarget(0);
+				d.fx = null;
+				d.fy = null;
+			}
+
+		})();
+	</script>
 </body>
 
 </html>
