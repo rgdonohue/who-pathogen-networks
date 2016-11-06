@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Pathogen networks</title>
+	<style>
+		body {
+			font-family: sans-serif;
+		}
+		svg {
+/*		  border: 2px solid blue;*/
+		}
+		.dot {
+/*			fill: grey;*/
+		}
+		#ui {
+			width: 150px;
+			position: absolute;
+			top: 30px;
+			right: 30px;
+		}
+		#ui h2 {
+			text-align: left;
+			font-weight: normal;
+			font-size: 1.3em;
+		}
+		button {
+			display: block;
+			margin-bottom: 10px;
+			font-size: 1.1em;
+		}
+		#Zika {
+			color: purple;
+		}
+		#Lassa {
+			color: red;
+		}
+		#Ebola {
+			color: blue;
+		}
+
+	</style>
+</head>
+
+<body>
+	
+	<svg class='svg' width="960" height="600"></svg>
+	<div id="ui">
+		<h2>pathogen</h2>
+			<button id="Zika" class="pathogenBut">Zika</button>
+			<button id="Lassa" class="pathogenBut">Lassa</button>
+			<button id="Ebola" class="pathogenBut">Ebola</button>
+			<div></div>
+		<br>
+		<h2>research area</h2>
+			<button id="Vaccine" class="researchBut">Vaccine</button>
+			<button id="Funder" class="researchBut">Funder</button>
+			<button id="Laboratory" class="researchBut">Laboratory</button>
+			<button id="Epi" class="researchBut">Epi</button>
+	</div>
+
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<script>
+	
+	(function() {
+		
+		var svg = d3.select("svg"),
+			width = +svg.attr("width"),
+			height = +svg.attr("height");
+		
+
+		d3.csv("data/data_20161027.csv", function (error, data) {
+			
+			makeViz(data);
+			
+		});
+			   
+		function makeViz(data) {
+			
+			
+			var dots = d3.select('svg')
+				.append('g')
+				.selectAll('circle')
+				.data(data)
+				.enter()
+				.append('circle')
+				.attr('class',function(d) {
+					if(d.Pathogen == "Ebola") {
+						return 'dot Ebola';
+					} else if(d.Pathogen == "Zika") {
+						return 'dot Zika';
+					} else if(d.Pathogen == "Lassa") {
+						return 'dot Lassa';
+					}
+				})
+				.attr('r','5')
+				.attr('cx', function() {
+					return Math.floor(Math.random() * (width + 1))
+				})
+				.attr('cy', function() {
+					return Math.floor(Math.random() * (height + 1))
+				})
+				.on('mouseover', function(d) {
+					console.log(d)
+				})
+				.attr('fill', function(d) {
+					if(d.Pathogen == "Ebola") {
+						return 'blue';
+					} else if(d.Pathogen == "Zika") {
+						return 'purple';
+					} else if(d.Pathogen == "Lassa") {
+						return 'red';
+					}
+				});
+			
+			makeUi();
+			
+		}// end makeViz
+		
+		function makeUi() {
+			
+			
+			d3.selectAll('.pathogenBut')
+				.on('click', function(e) {
+					var selectedPathogenButton = d3.select(this),
+						selectedPathogen = selectedPathogenButton.attr('id');
+				
+					d3.selectAll('.dot')
+						.attr('fill-opacity', '0');
+				
+					d3.selectAll('.'+selectedPathogen)
+						.transition()
+						.delay(400)
+						.attr('fill-opacity', '1');
+				});	
+			
+			
+			d3.selectAll('.researchBut')
+				.on('click', function(e) {
+					var selectedResearchButton = d3.select(this),
+						selectedResearch = selectedResearchButton.attr('id');
+				
+					d3.selectAll('.dot')
+						.attr('fill-opacity', '0');
+				
+					d3.selectAll('.'+selectedResearch)
+						.transition()
+						.delay(400)
+						.attr('fill-opacity', '1');
+				});	
+			
+		} // end makeUi
+		
+	})();
+		
+			
+			
+	
+
+	</script>
+</body>
+
+</html>

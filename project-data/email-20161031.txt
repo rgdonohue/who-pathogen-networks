@@ -1,0 +1,62 @@
+Hi Matt,
+
+Thanks a lot for that. We think that this draft visualization looks great and informative.
+
+Few suggestions: 
+- a different but similar representation could be used for the networks one (updated version attached), by similarly filtering "network" and "activity", on the right.
+- also, for both visualization, it would be great to have an hyperlink on each body or network to their website. Hope it is feasible.
+
+Let's discuss again on Wednesday, say 9.30am Geneva / 9.30pm Auckland ? 
+
+Best wishes
+Pierre
+
+
+
+FYI. Some further clarification of some use cases (in email) and a preliminary update to the data to show how various actors are connected. Note: this new data does not match the other spreadsheet -- there are more actors and some in original spreadsheet are missing. So no need to try and match them I think.
+
+Matt
+
+---------- Forwarded message ----------
+From: Pierre-Stéphane Gsell <pierresgsell@gmail.com>
+Date: Mon, Oct 31, 2016 at 3:32 AM
+Subject: Mapping of Networks
+To: zook@zooknic.com
+Cc: Ana Henao <henaorestrepoa@who.int>
+
+
+Hi Matt,
+
+Attached is a DRAFT database of international Networks of actors involved in Research and Development for Emerging Pathogens.
+First Columns are actors, thought to be "nodes" of different networks or "affiliations".
+
+Ultimately, we will integrate this in the other database for the global visualization tool.
+We did not integrate geographical information in that one, but will do if needed.
+
+
+Again, for the final mapping tool, as we discussed, the objectives are:
+- For the scientific community, to picture who is doing what, and with who, given a pathogen and given a research activity
+- For the funders, to get a sense of the gaps in research activity given a pathogen
+
+The November 10, High-Level meeting, in Londres will convene key "political" players (funders, industry, head of instittutes, etc) from the infectious disease R&D community.
+In preparation of the mapping tool, there are different messages we would like to illustrate the need for complementarity and global coordination in R&D in an equitable way (rich and poor countries).
+
+Among others: 
+
+-1. by illustrating the general R&D ecosystem for Ebola (i.e. a Ecosystem after a Public Health Emerging), Zika (i.e. a Ecosystem at early onset of a Public Health Emergency), and Lassa (Not Yet Public Health Emergency), which should illustrate the global activation of R&D following an Emergency, to highlights the need for R&D preparedness, i.e. activate R&D way before the Public Health Emergency occurs.
+
+-2. by illustrating the imbalance "North-South": Disease are in South, R&D is in mostly North. 
+
+-3. by illustrating the complexity of current networks and overlaps and duplication --> to highlight the need for complementarity and synergies through global coordination
+
+Any ideas are welcome.
+Talk to all next Tuesday ?
+
+Many thanks
+Kind regards
+
+
+Pierre
+
+
+

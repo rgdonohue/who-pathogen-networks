@@ -1,0 +1,25 @@
+
+Ana Maria likes this visualization
+http://social-physics.net/visualizing-scientific-collaboration-using-pubmed/
+
+And thought that this type of one might work as well
+http://mbostock.github.io/d3/talk/20111116/bundle.html 
+I thought we could cluster countries by region along the edge of the circle
+
+Variables to work with are 
+- location, WHO region and possibly country
+- pathogen
+- type of research (vaccines, lab methods/diagnostics, therapeutics)
+- type of actor (funders, people who run drug trials, basic researchers)
+- network connections would be binary and indicate actors that match on pathogen AND research topic (see use cases below).
+
+Use cases
+Funder perspective, looking for people to fund: What institutions in this region/country are doing work on this research topic for this pathogen?
+Researcher perspective 1 (same as funder perspective), looking for collaborators: What institutions in this region/country are funding work on this research topic for this pathogen?
+Researcher perspective 2, looking for funders to give money: What funders in this region/country are funding work on this research topic for this pathogen?
+Data
+It will be like the spreadsheet I sent last week. They will be sending me an updated version (including type of research) overnight.
+Meeting details
+with the "big boys" who can make funding and implementation decisions
+goals are to show 1) how exciting this is 2) that a solution is already in development to stop other efforts to do something similar.
+Get approval to take this prototype and develop it into a bigger system 
