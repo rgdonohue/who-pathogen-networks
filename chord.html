@@ -96,19 +96,33 @@
 			d3.csv("data/networks_20161107.csv", function(error, data) {
 				if (error) throw error;
 
-				var parsedData = [];
+				var alliliations = [];
 
 				data.forEach(function(d, i) {
 
-					parsedData.push({
-						'name': d.Body,
-						'affiliations': []
-					});
+					if(alliliations.indexOf(d.name) != 0 {
+
+					})
 
 					for (var i = 1; i <= 45; i++) {
-						if (d['Affiliation_' + i]) {
 
-							parsedData[parsedData.length - 1].affiliations.push(d['Affiliation_' + i])
+						if (d['Affiliation_' + i] != "") {
+
+							parsedData.forEach(function(d2,i2) {
+console.log(d)
+								var exists = 0;
+								if(d2.name == d['Affiliation_' + i]) {
+										exists = 1;
+										parsedData[d['Affiliation_' + i]].affiliations.push = [d.Body];
+								}
+
+								if(exists){
+									parsedData.push({
+										"name": d['Affiliation_' + i],
+										"affiliations":[d.Body]
+									})
+								}
+							});
 						}
 
 					}
@@ -117,8 +131,8 @@
 
 				console.log(parsedData)
 
-				var nodes = cluster.nodes(packageHierarchy(parsedData)),
-					links = packageAffiliations(nodes);
+				// var nodes = cluster.nodes(packageHierarchy(parsedData)),
+				// 	links = packageAffiliations(nodes);
 
 				console.log(nodes)
 				console.log(links)
