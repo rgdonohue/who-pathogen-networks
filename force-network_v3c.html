@@ -4,9 +4,11 @@
 <head>
 	<meta charset="utf-8">
 	<title>Pathogen networks</title>
+
+	<link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
 	<style>
 		body {
-			font-family: sans-serif;
+			font-family: "Lato", sans-serif;
 		}
 
 		h1 {
@@ -40,18 +42,23 @@
 			position: absolute;
 			top: 80px;
 			left: 15px;
-			width: 180px;
+			width: 220px;
 		}
 		button {
 			margin: 3px 0 4px;
-			width: 180px;
+			width: 220px;
 			height: 30px;
+			text-align: left;
+			font-family: "Lato", sans-serif;
+		}
+		button:hover {
+
 		}
 	</style>
 </head>
 
 <body>
-	<h1>global pathogen research network (draft 3)</h1>
+	<h1>global pathogen research network (draft 2)</h1>
 	<svg></svg>
 	<div id="ui">
 
@@ -152,9 +159,11 @@
 
 							// if aff is false, add our affiliation to the nodes
 							if (aff == 0) {
+
 								nodeData.nodes.push({
 									"id": d["Affiliation_" + i],
-									"group": i
+									"group": i,
+									"affiliation": true
 								})
 							}
 						}
@@ -214,13 +223,8 @@
 						return 6
 					})
 					.attr("fill", function(d) {
-						return 'grey';
-						if (keyActors[d.id]) {
-							return "orange";
-						} else {
-							return 'grey';
-						}
-						// return color(d.group);
+						if(d.affiliation) return 'lightgrey';
+						else return 'grey';
 					})
 					.on('mouseover', function(d) {
 						div.transition()
@@ -266,10 +270,8 @@
 								node.attr('fill', 'grey');
 								link.attr('stroke', 'grey').attr('stroke-width','.6')
 								node.each(function(n) {
-
-									if(n.id === actor) {
-										d3.select(this).attr('fill', 'orange')
-									}
+									if(n.affiliation) d3.select(this).attr('fill', 'lightgrey');
+									if(n.id === actor) d3.select(this).attr('fill', 'orange');
 								})
 
 								link.each(function(l) {
